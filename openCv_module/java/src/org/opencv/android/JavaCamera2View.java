@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -302,7 +303,8 @@ public class JavaCamera2View extends CameraBridgeViewBase {
             mFrameHeight = mPreviewSize.getHeight();
 
             if ((getLayoutParams().width == LayoutParams.MATCH_PARENT) && (getLayoutParams().height == LayoutParams.MATCH_PARENT))
-                mScale = Math.min(((float)height)/mFrameHeight, ((float)width)/mFrameWidth);
+//                mScale = Math.min(((float)height)/mFrameHeight, ((float)width)/mFrameWidth); //older way
+                mScale = Math.max(((float)height)/mFrameHeight, ((float)width)/mFrameWidth);
             else
                 mScale = 0;
 

@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
 
         supportFragmentManager.beginTransaction()
-            .add(binding.container.id, GrayScaleFragment.newInstance())
+            .add(binding.container.id, JavaCameraFragment.newInstance())
             .commit()
 
     }

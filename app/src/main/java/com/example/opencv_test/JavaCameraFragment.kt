@@ -13,10 +13,13 @@ import androidx.fragment.app.Fragment
 import com.example.opencv_test.databinding.FragmentJavaCameraBinding
 import org.opencv.android.BaseLoaderCallback
 import org.opencv.android.CameraBridgeViewBase
-import org.opencv.android.JavaCameraView
+import org.opencv.android.JavaCamera2View
 import org.opencv.android.OpenCVLoader
+import org.opencv.core.Core
 import org.opencv.core.CvType
 import org.opencv.core.Mat
+import org.opencv.core.Scalar
+import org.opencv.imgproc.Imgproc
 
 class JavaCameraFragment : Fragment(), CameraBridgeViewBase.CvCameraViewListener2 {
     private val TAG = "|${this.javaClass.simpleName}|"
@@ -76,10 +79,22 @@ class JavaCameraFragment : Fragment(), CameraBridgeViewBase.CvCameraViewListener
     }
 
     override fun onCameraFrame(inputFrame: CameraBridgeViewBase.CvCameraViewFrame?): Mat {
-        Log.i(TAG, "camera frame income ${inputFrame?.rgba().toString()}")
-        matMap["mat1"] = inputFrame?.rgba() as Mat
+//        val output = inputFrame!!.convertToHSV()
+        return inputFrame!!.convertToHSV()
+    }
 
-        return matMap["mat1"]!!
+    private fun CameraBridgeViewBase.CvCameraViewFrame.convertToHSV(): Mat {
+        val inputMat = Mat(rgba().width(), rgba().height(), CvType.CV_16UC4)
+        val outputMat = Mat(rgba().width(), rgba().height(), CvType.CV_16UC4)
+        Imgproc.cvtColor(rgba(), inputMat, Imgproc.COLOR_RGB2HSV)
+        Core.inRange(
+            inputMat,
+            Scalar(45.0, 20.0, 10.0),
+            Scalar(75.0, 255.0, 255.0),
+            outputMat
+        )
+
+        return outputMat
     }
 
     override fun onCameraViewStopped() {
@@ -90,9 +105,7 @@ class JavaCameraFragment : Fragment(), CameraBridgeViewBase.CvCameraViewListener
 
     override fun onCameraViewStarted(width: Int, height: Int) {
         Log.i(TAG, "camera view start $width - $height")
-        matMap["mat1"] = Mat(width, height, CvType.CV_8UC4)
-        matMap["mat2"] = Mat(width, height, CvType.CV_8UC4)
-        matMap["mat3"] = Mat(width, height, CvType.CV_8UC4)
+
     }
 
     companion object {
