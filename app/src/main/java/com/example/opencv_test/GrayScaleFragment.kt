@@ -17,13 +17,16 @@ import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
+import com.example.opencv_test.data.drawFaceRectangle
+import com.example.opencv_test.data.get480Image
+import com.example.opencv_test.data.loadFaceLib
 import com.example.opencv_test.databinding.FragmentGrayScaleBinding
 import org.opencv.android.BaseLoaderCallback
 import org.opencv.android.OpenCVLoader
 import org.opencv.android.Utils
 import org.opencv.core.Mat
-import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
+import org.opencv.objdetect.CascadeClassifier
 
 
 class GrayScaleFragment : Fragment() {
@@ -35,6 +38,8 @@ class GrayScaleFragment : Fragment() {
         get() = checkNotNull(_binding)
 
     private lateinit var loaderCallback: BaseLoaderCallback
+
+    private var faceDetector: CascadeClassifier? = null
 
     private val intentResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -48,7 +53,12 @@ class GrayScaleFragment : Fragment() {
         loaderCallback = object : BaseLoaderCallback(requireActivity()) {
             override fun onManagerConnected(status: Int) {
                 when (status) {
-                    SUCCESS -> Log.i(TAG, "status success")
+                    SUCCESS -> {
+                        Log.i(TAG, "status success")
+                        faceDetector =
+                            requireActivity().loadFaceLib(R.raw.haarcascade_frontalface_alt2)
+                        if (faceDetector == null || faceDetector!!.empty()) faceDetector = null
+                    }
                     else -> super.onManagerConnected(status)
                 }
             }
@@ -111,7 +121,9 @@ class GrayScaleFragment : Fragment() {
         Utils.bitmapToMat(confBitmap, rgba)
         Imgproc.cvtColor(rgba, grayMat, Imgproc.COLOR_RGB2GRAY)
 
-        Utils.matToBitmap(grayMat, grayBitmap)
+        val resultMat = faceDetector!!.drawFaceRectangle(rgba, grayMat)
+
+        Utils.matToBitmap(resultMat, grayBitmap)
 
         setImageBitmap(grayBitmap)
     }
